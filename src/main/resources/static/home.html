@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>VeyFlow</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+          background: linear-gradient(135deg, #4e54c8, #8f94fb);
+          min-height: 100vh;
+          font-family: 'Segoe UI', sans-serif;
+          color: #fff;
+          margin: 0;
+        }
+
+        .container {
+          padding: 3rem 1rem;
+          max-width: 1000px;
+          margin: auto;
+        }
+
+        h1 {
+          text-align: center;
+          margin-bottom: 2rem;
+          color: #ffffff;
+          text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        #addPostBtn {
+          display: block;
+          margin: 0 auto 2.5rem;
+          padding: 0.75rem 1.5rem;
+          background-color: #6c63ff;
+          color: #fff;
+          border: none;
+          border-radius: 0.75rem;
+          font-size: 1.1rem;
+          font-weight: 500;
+          transition: background-color 0.3s ease;
+        }
+
+        #addPostBtn:hover {
+          background-color: #5848d5;
+        }
+
+        .card {
+          border: none;
+          border-radius: 1rem;
+          box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+          color: #4e54c8;
+          font-weight: 600;
+        }
+
+        .card a {
+          text-decoration: none;
+          color: inherit;
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 id="greeting" class="mb-0"></h4>
+        <button id="logoutBtn" class="btn btn-danger">Logout</button>
+    </div>
+    <div class="container">
+        <header>
+            <h1>List of note</h1>
+        </header>
+        <button id="addPostBtn" onclick="window.location.href='note.html'">+ Create</button>
+        <div id="articleList" class="row g-4">
+
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        fetch("http://localhost:8080/api/getName")
+            .then(response => response.text())
+            .then(username => {
+                document.getElementById("greeting").textContent = "Hello, " + username;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById("username").textContent = "Undefined";
+            });
+        document.addEventListener("DOMContentLoaded", function () {
+          fetch("http://localhost:8080/api/articles")
+            .then(response => response.json())
+            .then(data => {
+              const list = document.getElementById("articleList");
+              data.forEach(article => {
+                const col = document.createElement("div");
+                col.className = "col-md-6 col-lg-4";
+
+                const card = document.createElement("div");
+                card.className = "card h-100";
+
+                const cardBody = document.createElement("div");
+                cardBody.className = "card-body";
+
+                const title = document.createElement("h5");
+                title.className = "card-title";
+                title.textContent = article.title;
+
+                const link = document.createElement("a");
+                link.href = "detail.html?id=" + article.id;
+                link.appendChild(title);
+
+                cardBody.appendChild(link);
+                card.appendChild(cardBody);
+                col.appendChild(card);
+                list.appendChild(col);
+              });
+            })
+            .catch(error => {
+              console.error("Error:", error);
+              document.getElementById("articleList").innerHTML = `
+                <div class="col-12 text-center">
+                  <p class="text-white fs-5">Error</p>
+                </div>`;
+            });
+        });
+        document.getElementById("logoutBtn").addEventListener("click", function () {
+            fetch("http://localhost:8080/api/logout", {
+                method: "POST",
+                credentials: "include"
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = "index.html";
+                } else {
+                    console.error("Logout failed");
+                }
+            })
+            .catch(error => {
+                console.error("Error during logout:", error);
+            });
+        });
+    </script>
+</body>
+</html>
